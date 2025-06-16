@@ -16,7 +16,6 @@
                     <group>
                         <field
               name="yearly"
-              attrs="{'invisible': [('custom','!=','yearly')]}"
               invisible="custom != 'yearly'"
             />
                         <field
