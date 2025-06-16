@@ -1,0 +1,185 @@
+<odoo>
+    <record id="paperformat_sales_report_pdf" model="report.paperformat">
+        <field name="name">sales report pdf</field>
+        <field name="default" eval="True" />
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">40</field>
+        <field name="dpi">80</field>
+    </record>
+    <template id="custom_sales_report_template">
+        <t t-call="web.html_container">
+            <t t-if="not o" t-set="o" t-value="docs" />
+            <t t-set="company" t-value="company_id" />
+            <div class="header mt-4">
+                <div style="border-bottom: 1px solid black;">
+                    <img
+            t-if="o.company_id.logo"
+            t-att-src="image_data_uri(o.company_id.logo)"
+            alt="Company Logo"
+            class="float-left"
+            height="100"
+            width="200"
+            style="margin-top:5px"
+          />
+                    <div
+            style="font-size:14px;text-align:right;margin-right:10px"
+            class="float-right"
+          >
+                        <div>
+                            <strong t-field="o.company_id.partner_id.name" />
+                            <span
+                t-field="o.company_id.partner_id"
+                t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;], &quot;no_marker&quot;: true}"
+              />
+                            <span t-field="o.company_id.partner_id.website" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-call="web.internal_layout">
+                <div class="page" style="page-break-after: always;">
+                    <div class="row">
+                        <div class="col-12 mt-2 text-center">
+                            <h3>
+                                <b>
+                                    <span t-raw="title" />
+                                </b>
+                            </h3>
+                            <h4>
+                                <t t-if="year != ''">
+                                    <strong>Year:</strong>
+                                    <span t-raw="year" />
+                                </t>
+                            </h4>
+                            <h4>
+                                <t t-if="month != ''">
+                                    <strong>Month:</strong>
+                                    <span t-raw="month" />
+                                </t>
+                            </h4>
+                            <div class="pt-3 text-center mb-4">
+                                <t t-if="start_date != ''">
+                                    <strong>From:</strong>
+                                    <span t-raw="start_date" />
+                                </t>
+                                <t t-if="end_date != ''">
+                                    <strong>To:</strong>
+                                    <span t-raw="end_date" />
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-2" />
+                        <div class="col-8">
+                            <table class="table table-bordered table-sm mt-4">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Total Sale</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t
+                    t-foreach="payment_method_totals"
+                    t-as="payment_method"
+                  >
+                                        <tr>
+                                            <td class="text-center">
+                                                <span
+                          t-esc="payment_method['journal_name']"
+                        />
+                                            </td>
+                                            <td class="text-center">
+                                                <span
+                          t-esc="'%.2f' % payment_method['journal_total']"
+                        />
+                                                <span class="mr3 ml5" t-esc="symbol" />
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-foreach="vat_data" t-as="vat">
+                                        <tr>
+                                            <td class="text-center">
+                                                <span t-esc="vat['tax_name']" />
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-esc="'%.2f' % vat['net']" />
+                                                <span class="mr3 ml5" t-esc="symbol" />
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <tr>
+                                        <td class="text-center">
+                                            <strong>Total Excl VAT</strong>
+                                        </td>
+                                        <td class="text-center">
+                                            <strong>
+                                                <span
+                          t-esc="'%.2f' % abs(grand_total_excl_vat)"
+                        />
+                                                <span class="mr3 ml5" t-esc="symbol" />
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">
+                                            <strong>Total VAT</strong>
+                                        </td>
+                                        <td class="text-center">
+                                            <strong>
+                                                <span
+                          t-esc="'%.2f' % abs(grand_total_vat)"
+                        />
+                                                <span class="mr3 ml5" t-esc="symbol" />
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">
+                                            <strong>Grand Total</strong>
+                                        </td>
+                                        <td class="text-center">
+                                            <strong>
+                                                <span
+                          t-esc="'%.2f' % abs(grand_total_incl_vat)"
+                        />
+                                                <span class="mr3 ml5" t-esc="symbol" />
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-2" />
+                    </div>
+                </div>
+                <div class="footer">
+                    <div class="text-center" style="border-top: 1px solid black;" />
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="custom_sales_report_id" model="ir.actions.report">
+        <field name="name">Sales Report</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">ff_sales_report.custom_sales_report_template</field>
+        <field name="report_file">ff_sales_report.custom_sales_report_template</field>
+        <field
+      name="paperformat_id"
+      ref="ff_sales_report.paperformat_sales_report_pdf"
+    />
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
